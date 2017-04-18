@@ -669,9 +669,7 @@ void module_usage() {
 #define STR_NULL(s) ((s) == NULL ? "(null)" : (s))
 
 void hydra_debug(int force, char *string) {
-  int active = 0;
-  int inactive = 0;
-  int i;
+  int active = 0, inactive = 0, i;
 
   if (!debug && !force)
     return;
@@ -706,9 +704,8 @@ void hydra_debug(int force, char *string) {
        STR_NULL(target->pass_ptr));
   }
 
-  if (hydra_heads == NULL) {
-    return
-  }
+  if (hydra_heads == NULL)
+    return;
 
   for (i = 0; i < hydra_options.max_use; i++) {
     if (hydra_heads[i]->active >= 0) {
@@ -4195,7 +4192,7 @@ int main(int argc, char *argv[]) {
              hydra_brains.sent, // tries
              (long unsigned int) ((elapsed_status - starttime) / 3600), // hours
              (long unsigned int) (((elapsed_status - starttime) % 3600) / 60),  // minutes
-             (hydra_brains.todo_all + total_redo_count) - hydra_brains.sent,    // left todo
+             (hydra_brains.todo_all + total_redo_count) - hydra_brains.sent != 0 ? (hydra_brains.todo_all + total_redo_count) - hydra_brains.sent : 1,    // left todo
              (long unsigned int) (((double) (hydra_brains.todo_all + total_redo_count) - hydra_brains.sent) / ((double) hydra_brains.sent / (elapsed_status - starttime))
              ) / 3600,          // hours
              (((long unsigned int) (((double) (hydra_brains.todo_all + total_redo_count) - hydra_brains.sent) / ((double) hydra_brains.sent / (elapsed_status - starttime))
