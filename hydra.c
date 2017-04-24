@@ -973,7 +973,7 @@ void hydra_restore_read() {
   }
   if (debug)
     printf("[DEBUG] reading restore file: Step 11 complete\n");
-  hydra_heads = malloc((hydra_options.max_use + 2) * sizeof(int) + 16);
+  hydra_heads = malloc(sizeof(hydra_head*) * hydra_options.max_use);
   for (j = 0; j < hydra_options.max_use; j++) {
     hydra_heads[j] = malloc(sizeof(hydra_head));
     fck = (int) fread(hydra_heads[j], sizeof(hydra_head), 1, f);
@@ -3604,7 +3604,7 @@ int main(int argc, char *argv[]) {
        if (tmpptr != NULL)
          *tmpptr = 0;
        countservers = hydra_brains.targets = 1;
-       hydra_targets = malloc(sizeof(int) * 4);
+       hydra_targets = malloc(sizeof(hydra_target*) * 4);
        hydra_targets[0] = malloc(sizeof(hydra_target));
        memset(hydra_targets[0], 0, sizeof(hydra_target));
        hydra_targets[0]->target = servers_ptr = hydra_options.server;
@@ -3662,7 +3662,7 @@ int main(int argc, char *argv[]) {
      }
     } else {                    // standard: single target on command line
       countservers = hydra_brains.targets = 1;
-      hydra_targets = malloc(sizeof(int) * 4);
+      hydra_targets = malloc(sizeof(hydra_target*) * 4);
       hydra_targets[0] = malloc(sizeof(hydra_target));
       memset(hydra_targets[0], 0, sizeof(hydra_target));
       hydra_targets[0]->target = servers_ptr = hydra_options.server;
