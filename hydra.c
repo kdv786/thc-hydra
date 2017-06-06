@@ -187,6 +187,31 @@ extern int old_ssl;
 
 void hydra_kill_head(int head_no, int killit, int fail);
 
+// some enum definitions
+typedef enum {
+  STATE_ACTIVE = 0,
+  STATE_FINISHED = 1,
+  STATE_ERROR = 2,
+  STATE_UNRESOLVED = 3
+} target_state_t;
+
+typedef enum {
+  MODE_PASSWORD_LIST = 1,
+  MODE_LOGIN_LIST = 2,
+  MODE_PASSWORD_BRUTE = 4,
+  MODE_PASSWORD_REVERSE = 8,
+  MODE_PASSWORD_NULL = 16,
+  MODE_PASSWORD_SAME = 32,
+  MODE_COLON_FILE = 64
+} hydra_mode_t;
+
+typedef enum {
+  FORMAT_PLAIN_TEXT,
+  FORMAT_JSONV1,
+  FORMAT_JSONV2,
+  FORMAT_XMLV1
+} output_format_t;
+
 // some structure definitions
 typedef struct {
   pid_t pid;
@@ -280,7 +305,6 @@ typedef struct {
 
 // external vars
 extern char HYDRA_EXIT[5];
-
 #if !defined(ANDROID) && !defined(__BIONIC__)
 extern int errno;
 #endif
@@ -328,6 +352,11 @@ int snpdone, snp_is_redo, snpbuflen, snpi, snpj, snpdont;
     if (ext) \
       printf(text, ##__VA_ARGS__); \
   } while(0)
+
+
+int inline check_flag(int value, int flag) {
+  return (value & flag) == flag;
+}
 
 void help(int ext) {
   PRINT_NORMAL(ext, "Syntax: hydra [[[-l LOGIN|-L FILE] [-p PASS|-P FILE]] | [-C FILE]] [-e nsr]"
