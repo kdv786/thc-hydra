@@ -491,7 +491,6 @@ void help(int32_t ext) {
 #ifdef HAVE_MATH_H
                     "  -x MIN:MAX:CHARSET  password bruteforce generation, type \"-x -h\" to get help\n"
                     "  -y        disable use of symbols in bruteforce, see above\n"
-                    "  -r		 rainy mode for password generation (-x)\n"
 #endif
                     "  -e nsr    try \"n\" null password, \"s\" login as pass and/or \"r\" reversed login\n"
                     "  -u        loop around users, not passwords (effective! implied with -x)\n");
@@ -509,6 +508,7 @@ void help(int32_t ext) {
                     "  -4 / -6   use IPv4 (default) / IPv6 addresses (put always in [] also in -M)\n"
                     "  -v / -V / -d  verbose mode / show login+pass for each attempt / debug mode \n"
                     "  -O        use old SSL v2 and v3\n"
+                    "  -K        do not redo failed attempts (good for -M mass scanning)\n"
                     "  -q        do not print messages about connection errors\n",
                MAXTASKS, WAITTIME, conwait
                );
@@ -1398,6 +1398,7 @@ void hydra_increase_fail_count(int32_t target_no, int32_t head_no) {
     if (k <= 1) {
       // we need to put this in a list, otherwise we fail one login+pw test
       if (hydra_targets[target_no]->done == TARGET_ACTIVE
+          && hydra_options.skip_redo == 0
           && hydra_targets[target_no]->redo <= hydra_options.max_use * 2
           && ((hydra_heads[head_no]->current_login_ptr != empty_login && hydra_heads[head_no]->current_pass_ptr != empty_login)
               || (hydra_heads[head_no]->current_login_ptr != NULL && hydra_heads[head_no]->current_pass_ptr != NULL))) {
@@ -1430,6 +1431,7 @@ void hydra_increase_fail_count(int32_t target_no, int32_t head_no) {
     } else {
       // we need to put this in a list, otherwise we fail one login+pw test
       if (hydra_targets[target_no]->done == TARGET_ACTIVE
+          && hydra_options.skip_redo == 0
           && hydra_targets[target_no]->redo <= hydra_options.max_use * 2
           && ((hydra_heads[head_no]->current_login_ptr != empty_login && hydra_heads[head_no]->current_pass_ptr != empty_login)
               || (hydra_heads[head_no]->current_login_ptr != NULL && hydra_heads[head_no]->current_pass_ptr != NULL))) {
@@ -1737,7 +1739,7 @@ int32_t hydra_send_next_pair(int32_t target_no, int32_t head_no) {
 #ifndef HAVE_MATH_H
                   sleep(1);
 #else
-                  hydra_targets[target_no]->pass_ptr = bf_next(hydra_options.rainy);
+                  hydra_targets[target_no]->pass_ptr = bf_next();
                   if (debug)
                     printf("[DEBUG] bfg new password for next child: %s\n", hydra_targets[target_no]->pass_ptr);
 #endif
@@ -2214,7 +2216,6 @@ int main(int argc, char *argv[]) {
   hydra_brains.ofp = stdout;
   hydra_brains.targets = 1;
   hydra_options.waittime = waittime = WAITTIME;
-  hydra_options.rainy = 0;
   bf_options.disable_symbols = 0;
 
   // command line processing
@@ -2222,13 +2223,16 @@ int main(int argc, char *argv[]) {
     help(1);
   if (argc < 2)
     help(0);
-  while ((i = getopt(argc, argv, "hIq64Rrde:vVl:fFg:L:p:OP:o:b:M:C:t:T:m:w:W:s:SUux:yc:")) >= 0) {
+  while ((i = getopt(argc, argv, "hIq64Rde:vVl:fFg:L:p:OP:o:b:M:C:t:T:m:w:W:s:SUux:yc:K")) >= 0) {
     switch (i) {
     case 'h':
       help(1);
       break;
     case 'q':
       quiet = 1;
+      break;
+    case 'K':
+      hydra_options.skip_redo = 1;
       break;
     case 'O':
       old_ssl = 1;
@@ -2245,9 +2249,6 @@ int main(int argc, char *argv[]) {
     case 'R':
       hydra_options.restore = 1;
       hydra_restore_read();
-      break;
-    case 'r':
-      hydra_options.rainy = 1;
       break;
     case 'I':
       ignore_restore = 1; // this is not to be saved in hydra_options!
@@ -3250,7 +3251,7 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_MATH_H
             if (bf_init(bf_options.arg))
               exit(-1);         // error description is handled by bf_init
-            pass_ptr = bf_next(hydra_options.rainy);
+            pass_ptr = bf_next();
             hydra_brains.countpass += bf_get_pcount();
             hydra_brains.sizepass += BF_BUFLEN;
 #else
