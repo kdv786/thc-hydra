@@ -226,7 +226,7 @@ char *SERVICES = "adam6500 asterisk afp cisco cisco-enable cvs firebird ftp[s] "
 #define RESTOREFILE "./hydra.restore"
 
 #define PROGRAM "Hydra"
-#define VERSION "v9.1"
+#define VERSION "v9.2"
 #define AUTHOR "van Hauser/THC"
 #define EMAIL "<vh@thc.org>"
 #define AUTHOR2 "David Maciejak"
@@ -613,10 +613,6 @@ void help_bfg() {
 
 void module_usage() {
   int32_t i;
-  if (!hydra_options.service) {
-    printf("The Module %s does not need or support optional parameters\n", hydra_options.service);
-    exit(0);
-  }
 
   printf("\nHelp for module "
          "%s:\n================================================================"
